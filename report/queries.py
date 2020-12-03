@@ -30,9 +30,6 @@ def get_total_counts(website_id, action_id=None, distinct_session=False):
     website_db = mongo_client[website_id]
     events = website_db[EVENTS]
 
-    if distinct_session:
-        # todo
-        pass
     page_view_filter = {
         "event": {"$in": ["PAGE_VIEW"]}
     }
@@ -61,30 +58,40 @@ def get_total_counts(website_id, action_id=None, distinct_session=False):
         desktop_filter["targetEntityId"] = {"$in": [action_id]}
         not_desktop_filter["targetEntityId"] = {"$in": [action_id]}
 
+    group_key = "$_id"
+    if distinct_session:
+        group_key = "$entityId"
+
     pipeline = [
         {"$facet": {
             "pageViewCount": [
                 {"$match": page_view_filter},
+                {"$group": {"_id": group_key}},
                 {"$count": "pageViewCount"}
             ],
             "executeCount": [
                 {"$match": execute_filter},
+                {"$group": {"_id": group_key}},
                 {"$count": "executeCount"},
             ],
             "closedCount": [
                 {"$match": close_filter},
+                {"$group": {"_id": group_key}},
                 {"$count": "closedCount"}
             ],
             "clickedCount": [
                 {"$match": click_filter},
+                {"$group": {"_id": group_key}},
                 {"$count": "clickedCount"}
             ],
             "desktopCount": [
                 {"$match": desktop_filter},
+                {"$group": {"_id": group_key}},
                 {"$count": "desktopCount"}
             ],
             "notDesktopCount": [
                 {"$match": not_desktop_filter},
+                {"$group": {"_id": group_key}},
                 {"$count": "notDesktopCount"}
             ],
         }},
@@ -126,23 +133,10 @@ def get_days_counts(website_id, from_date, to_date, action_id=None, distinct_ses
     website_db = mongo_client[website_id]
     events = website_db[EVENTS]
 
-    if distinct_session:
-        # todo
-        pass
-
     page_view_event_types = ["PAGE_VIEW"]
     execute_event_types = ["BANNER_SHOW", "ANIMATION_RUN"]
     close_event_types = ["BANNER_CLOSE"]
     click_event_types = ["BANNER_BUTTON_CLICK", "ANIMATION_CLICK_ITEM"]
-    # execute_filter = {
-    #     "event": {"$in": ["BANNER_SHOW", "ANIMATION_RUN"]}
-    # }
-    # close_filter = {
-    #     "event": {"$in": ["BANNER_CLOSE"]}
-    # }
-    # click_filter = {
-    #     "event": {"$in": ["BANNER_BUTTON_CLICK", "ANIMATION_CLICK_ITEM"]}
-    # }
 
     filters = {
         "eventTime": {
@@ -153,7 +147,22 @@ def get_days_counts(website_id, from_date, to_date, action_id=None, distinct_ses
     if action_id:
         filters["targetEntityId"] = {"$in": [action_id]}
 
+    group_key = "$_id"
+    if distinct_session:
+        if action_id:
+            group_key = {"$concat": ["$entityId", "__", "$event", "__", "$targetEntityId"]}
+        else:
+            group_key = {"$concat": ["$entityId", "__", "$event"]}
+
     pipeline = [
+        {
+            "$group": {
+                "_id": group_key,
+                "eventTime": {"$first": "$eventTime"},
+                "targetEntityId": {"$first": "$targetEntityId"},
+                "event": {"$first": "$event"},
+            }
+        },
         {
             "$match": filters
         },
@@ -165,7 +174,6 @@ def get_days_counts(website_id, from_date, to_date, action_id=None, distinct_ses
                         "date": f"${DATE_FIELD}"
                     }
                 },
-                # "count": {"$sum": 1},
                 "pageViewCount": {
                     "$sum": {"$cond": [{"$in": ["$event", page_view_event_types]}, 1, 0]}
                 },
@@ -180,7 +188,9 @@ def get_days_counts(website_id, from_date, to_date, action_id=None, distinct_ses
                 },
             }
         },
-        {"$sort": {"_id": 1}}
+        {
+            "$sort": {"_id": 1}
+        }
     ]
 
     aggregate_results = events.aggregate(pipeline)
@@ -195,6 +205,7 @@ def get_days_counts(website_id, from_date, to_date, action_id=None, distinct_ses
         result_dict.get('_id'): result_dict
         for result_dict in _results
     }
+    # print(f'============> {day_date_to_result_dict}')
     results = []
     day_date = deepcopy(from_date)
     while day_date <= to_date:

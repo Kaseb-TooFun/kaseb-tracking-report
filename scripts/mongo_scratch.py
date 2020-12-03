@@ -33,27 +33,33 @@ def find_active_configs():
 def check_config_events(website_id):
     my_db = my_client[website_id]
     my_events = my_db[EVENTS]
-    one = my_events.find_one()
+    # one = my_events.find_one()
     # print(f'find one: {one}')
+    start_dt = datetime(2020, 10, 9)
+    query = dict()
+    # query["eventTime"] = {"$gte": start_dt, "$lt": start_dt + timedelta(days=1)}
+    query["event"] = {"$in": ["BANNER_SHOW", "ANIMATION_RUN"]}
 
-    for i, ev in enumerate(list(my_events.find())):
-        print(f'event {i}: {ev}')
+    for i, ev in enumerate(
+            list(
+                my_events.find(query).distinct("entityId")
+            )
+    ):
+        print(f'event {i+1}: {ev}')
 
-    # start_dt = datetime(2020, 10, 7)
-    # query = {"eventTime": {"$gte": start_dt, "$lt": start_dt + timedelta(days=1)}}
-    query = {}
-    property = "event"
-    events = my_events.find(query, {"_id": 0, property: 1})
+    property = "entityId"
+    events = my_events.find(
+        query,
+        # {"_id": 0, property: 1}
+    )
 
     ev2cnt = dict()
-    for evd in events:
-        # print(evd)
+    for i, evd in enumerate(events):
+        print(f'{i}: {evd}')
         ev = evd.get(property)
         ev2cnt[ev] = ev2cnt.get(ev, 0) + 1
         # et = evd.get("eventTime")
         # print(et)
-
-        # pass
 
     print(f'{property} to counts:\n {json.dumps(ev2cnt, indent=4)}')
 
@@ -62,21 +68,23 @@ def check_config_events(website_id):
 
 active_website_id = "7bba2f99-75a2-43b6-8f0f-0ad882f10d8a"
 active_action_id = "0e640251-bdc4-4264-a557-011d9a5d41f7"
-# check_config_events(active_website_id)
+check_config_events(active_website_id)
 
 # =========== queries =============
 from report import queries
 
 # results = queries.get_total_counts(
 #     active_website_id,
-#     # active_action_id
+#     # active_action_id,
+#     distinct_session=True,
 # )
 # pprint(results)
 
 results = queries.get_days_counts(
     website_id=active_website_id,
-    from_date=datetime.now() - timedelta(days=80),
-    to_date=datetime.now()-timedelta(days=30),
-    # action_id=active_action_id
+    from_date=datetime(2020, 1, 9),
+    to_date=datetime(2020, 12, 9),
+    # action_id=active_action_id,
+    distinct_session=True
 )
 pprint(results)
