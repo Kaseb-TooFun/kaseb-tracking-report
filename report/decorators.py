@@ -30,8 +30,9 @@ def check_access_to_website(function):
         if authorization_value and ADMIN_KEY and authorization_value == ADMIN_KEY:
             has_access = True
 
-        # check authentication header by call website api
-        has_access = check_access_to_website_by_api_call(website_id, authorization_value)
+        if not has_access:
+            # check authentication header by call website api
+            has_access = check_access_to_website_by_api_call(website_id, authorization_value)
 
         if has_access:
             return function(request, *args, **kwargs)
