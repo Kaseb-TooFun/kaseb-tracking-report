@@ -26,7 +26,7 @@
 
 ---
 
-### Endpoints
+# Endpoints
 - /api/report/total/website/website_id
 - /api/report/total/website/website_id/action/action_id
 - /api/report/days/website/website_id?from_day=-29&to_day=0
@@ -36,6 +36,11 @@
 - Authorization:
     1. admin_key 
     2. or valid authorization header in kaseb backend
+
+
+#### unique session option in all report endpoints
+- Add `distinct=true` to url params.
+
 
 #### days endpoint query params:
 - from_day: start day report, delta days from today, default: -29
