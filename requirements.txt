@@ -18,3 +18,4 @@ simplejson==3.17.2
 sqlparse==0.4.1
 uritemplate==3.0.1
 urllib3==1.26.2
+hypercorn==0.11.1
