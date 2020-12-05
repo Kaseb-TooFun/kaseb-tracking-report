@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from report import queries
 from report.decorators import check_access_to_website
-
+from utils import extract_dates_from_request
 
 COUNT_KEYS = [
     "pageViewCount",
@@ -52,22 +51,12 @@ def website_days_report(request, website_id):
     response_data = dict(websiteId=website_id)
 
     distinct_session = request.GET.get('distinct', '').lower() in ['0', 't', 'true']
-    from_date_delta_days = -29
-    try:
-        from_date_delta_days = int(request.GET.get('from_day', from_date_delta_days))
-    except:
-        pass
-
-    to_date_delta_days = 0
-    try:
-        to_date_delta_days = int(request.GET.get('to_day', to_date_delta_days))
-    except:
-        pass
+    from_date, to_date = extract_dates_from_request(request)
 
     days_report = queries.get_days_counts(
         website_id=website_id,
-        from_date=datetime.now() + timedelta(days=from_date_delta_days),
-        to_date=datetime.now() + timedelta(days=to_date_delta_days),
+        from_date=from_date,
+        to_date=to_date,
         distinct_session=distinct_session
     )
     response_data['days'] = days_report
@@ -83,22 +72,12 @@ def action_days_report(request, website_id, action_id):
     )
 
     distinct_session = request.GET.get('distinct', '').lower() in ['0', 't', 'true']
-    from_date_delta_days = -29
-    try:
-        from_date_delta_days = int(request.GET.get('from_day', from_date_delta_days))
-    except:
-        pass
-
-    to_date_delta_days = 0
-    try:
-        to_date_delta_days = int(request.GET.get('to_day', to_date_delta_days))
-    except:
-        pass
+    from_date, to_date = extract_dates_from_request(request)
 
     days_report = queries.get_days_counts(
         website_id=website_id,
-        from_date=datetime.now() + timedelta(days=from_date_delta_days),
-        to_date=datetime.now() + timedelta(days=to_date_delta_days),
+        from_date=from_date,
+        to_date=to_date,
         action_id=action_id,
         distinct_session=distinct_session
     )

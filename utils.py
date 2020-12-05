@@ -1,7 +1,9 @@
 import os
 import pymongo
 from django.conf import settings
-from pip._vendor import requests
+import requests
+from datetime import datetime, timedelta
+
 
 MONGO_CONFIG_KEY = 'MONGO_CONFIG'
 ADMIN_KEY_KEY = 'ADMIN_KEY'
@@ -26,6 +28,28 @@ def get_admin_key():
 def get_backend_base_url():
     base_url = os.getenv(BACKEND_BASE_URL_KEY)
     return base_url
+
+
+def extract_dates_from_request(request):
+    date_format = '%Y%m%d'
+
+    from_date = datetime.now() - timedelta(days=29)
+    try:
+        from_date_str = request.GET.get('from_day', '')
+        if from_date_str:
+            from_date = datetime.strptime(from_date_str, date_format)
+    except:
+        pass
+
+    to_date = datetime.now()
+    try:
+        to_date_str = request.GET.get('to_day', '')
+        if to_date_str:
+            to_date = datetime.strptime(to_date_str, date_format)
+    except:
+        pass
+
+    return from_date, to_date
 
 
 def check_access_to_website_by_api_call(website_id, authorization_value):
