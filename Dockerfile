@@ -19,4 +19,4 @@ EXPOSE 8000
 #ARG SECRET_KEY
 #ENV SECRET_KEY=$SECRET_KEY
 ENTRYPOINT python manage.py migrate && \
-    hypercorn server.asgi:application --bind 0.0.0.0:8000
+    hypercorn kaseb_tracking_report.asgi:application --bind 0.0.0.0:8000
