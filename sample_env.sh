@@ -1,6 +1,6 @@
 export DEBUG="False"
 export MONGO_CONFIG="mongodb://USER:PASS@IP:PORT"
-export BACKEND_BASE_URL="https://api.mykaseb.ir"
+export BACKEND_BASE_URL="https://devapi.kaseb.xyz"
 export ADMIN_KEY=""
 export SECRET_KEY=""
 export ALLOWED_HOSTS="['example.kaseb.xyz']"
