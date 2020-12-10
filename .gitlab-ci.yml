@@ -9,7 +9,8 @@ variables:
   DOCKER_DRIVER: overlay2
 
 stages:
-  - build
+  - package
+  - tag
   - deploy
 
 docker-build:
