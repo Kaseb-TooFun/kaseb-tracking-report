@@ -29,7 +29,7 @@ DEBUG = bool(os.getenv('DEBUG', '').lower() == 'true')
 
 os_allowed_hosts = os.getenv('ALLOWED_HOSTS', '["*"]')
 _allowed_hosts = ['*']
-if os_allowed_hosts len(os_allowed_hosts) > 2 and os_allowed_hosts[0] == os_allowed_hosts[-1] and os_allowed_hosts[0] in ["'", '"']:
+if os_allowed_hosts and len(os_allowed_hosts) > 2 and os_allowed_hosts[0] == os_allowed_hosts[-1] and os_allowed_hosts[0] in ["'", '"']:
     os_allowed_hosts = os_allowed_hosts[1:-1]
 try:
     _allowed_hosts = json.loads(os_allowed_hosts)
