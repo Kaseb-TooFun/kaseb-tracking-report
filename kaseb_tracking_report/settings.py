@@ -27,7 +27,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # print("DEBUG:", os.getenv('DEBUG', '').lower())
 DEBUG = bool(os.getenv('DEBUG', '').lower() == 'true')
 
-# print('*******pnnnn', os.getenv('ALLOWED_HOSTS'))
+os_allowed_hosts = os.getenv('ALLOWED_HOSTS')
+raise Exception(f"*******pnnnn {os_allowed_hosts}")
 ALLOWED_HOSTS = ['*']  # json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
 
 
